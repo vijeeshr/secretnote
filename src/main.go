@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/google/uuid"
 )
@@ -68,25 +69,31 @@ func main() {
 		}
 
 		// Validate
-		// Todo: Handle after trimming spaces
-		if createReq.Content == "" {
-			http.Error(w, "argument message not provided", http.StatusBadRequest)
+		content := strings.TrimSpace(createReq.Content)
+		if content == "" {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		if len(content) > 2048 {
+			http.Error(w, "content is restricted to 2048 bytes", http.StatusRequestEntityTooLarge)
 			return
 		}
 		if createReq.Views == 0 {
-			http.Error(w, "argument views cannot be 0", http.StatusBadRequest)
+			w.WriteHeader(http.StatusBadRequest)
+			return
 		}
 		if createReq.ExpiryInMinutes < 1 || createReq.ExpiryInMinutes > 60 {
-			http.Error(w, "argument expiryInMinutes must be in 1-60 range", http.StatusBadRequest)
+			http.Error(w, "argument 'expiryInMinutes' must be in 1-60 range", http.StatusBadRequest)
+			return
 		}
 
 		// Start creation
 		id := uuid.NewString()
-		message := &Message{Id: id, Content: createReq.Content, ViewsLeft: createReq.Views}
+		message := &Message{Id: id, Content: content, ViewsLeft: createReq.Views}
 
 		// Save to Redis
 		if ok := red.Create(message, createReq.ExpiryInMinutes); !ok {
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
@@ -94,7 +101,7 @@ func main() {
 		data, err := json.Marshal(CreateMessageRes{Id: id})
 		if err != nil {
 			slog.Error("Error marshalling CreateMessageRes", "details", err.Error())
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
@@ -106,13 +113,13 @@ func main() {
 	router.HandleFunc("GET /show/{id}", func(w http.ResponseWriter, r *http.Request) {
 		id := r.PathValue("id")
 		if id == "" {
-			http.Error(w, "id missing", http.StatusBadRequest)
+			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 
 		msg, ok := red.Show(id)
 		if !ok || msg == nil {
-			http.Error(w, "not found", http.StatusNotFound)
+			w.WriteHeader(http.StatusNotFound)
 			return
 		}
 
