@@ -54,6 +54,12 @@ func main() {
 	router := http.NewServeMux()
 
 	router.HandleFunc("POST /create", func(w http.ResponseWriter, r *http.Request) {
+		// Origin check
+		// if !IsValidOrigin(r) {
+		// 	http.Error(w, "invalid origin", http.StatusForbidden)
+		// 	return
+		// }
+
 		// Parse request
 		var createReq CreateMessageReq
 		err := decodeJSONBody(w, r, &createReq)
@@ -111,6 +117,12 @@ func main() {
 	})
 
 	router.HandleFunc("GET /show/{id}", func(w http.ResponseWriter, r *http.Request) {
+		// Origin check
+		// if !IsValidOrigin(r) {
+		// 	http.Error(w, "invalid origin", http.StatusForbidden)
+		// 	return
+		// }
+
 		id := r.PathValue("id")
 		if id == "" {
 			w.WriteHeader(http.StatusBadRequest)
@@ -138,4 +150,13 @@ func main() {
 		logger.Error(err.Error())
 		os.Exit(1)
 	}
+}
+
+func IsValidOrigin(r *http.Request) bool {
+	origin := r.Header.Get("Origin")
+	switch origin {
+	case "http://localhost:8085", "https://localhost:8085", "http://localhost", "https://localhost":
+		return true
+	}
+	return false
 }
