@@ -84,8 +84,8 @@ func main() {
 			http.Error(w, "content is restricted to 2048 bytes", http.StatusRequestEntityTooLarge)
 			return
 		}
-		if createReq.Views == 0 {
-			w.WriteHeader(http.StatusBadRequest)
+		if createReq.Views < 1 || createReq.Views > 100 {
+			http.Error(w, "argument 'views' must be in 1-100 range", http.StatusBadRequest)
 			return
 		}
 		if createReq.ExpiryInMinutes < 1 || createReq.ExpiryInMinutes > 60 {
