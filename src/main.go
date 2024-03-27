@@ -116,7 +116,7 @@ func main() {
 		w.Write(data)
 	})
 
-	router.HandleFunc("GET /show/{id}", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc("GET /reveal/{id}", func(w http.ResponseWriter, r *http.Request) {
 		// Origin check
 		// if !IsValidOrigin(r) {
 		// 	http.Error(w, "invalid origin", http.StatusForbidden)
@@ -143,6 +143,13 @@ func main() {
 
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(data)
+	})
+
+	router.HandleFunc("GET /show/{id}", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "public/show.html")
+	})
+	router.HandleFunc("GET /show/output.css", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "public/output.css")
 	})
 
 	router.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
