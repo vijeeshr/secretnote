@@ -16,10 +16,29 @@
       const createSecret = () => {
         const contentEl = document.querySelector('#message')
         const linkEl = document.querySelector('#link')
-        const expiryMinutes = document.querySelector('#expiryminutes').value
-        const expiryViews = document.querySelector('#expiryviews').value
+        const expiryMinutesEl = document.querySelector('#expiryminutes')
+        const expiryViewsEl = document.querySelector('#expiryviews')
+        const errorStatusEl = document.querySelector('#errorstatus')
+
         linkEl.value = ''
         const content = contentEl.value
+
+        // Validate inputs
+        errorStatusEl.innerText = ''
+        errorStatusEl.classList.add('hidden')
+        if (content.trim() == "") {
+          errorStatusEl.innerText = 'No text message entered'
+          errorStatusEl.classList.remove('hidden')
+          return
+        }
+        const expiryMinutes = expiryMinutesEl.value
+        const expiryViews = expiryViewsEl.value
+        if (expiryMinutes < 1 || expiryMinutes > 60 || expiryViews < 1 || expiryViews > 100) {
+          errorStatusEl.innerText = 'Expiry minute(s) must range 1-60 and view(s) must range 1-100'
+          errorStatusEl.classList.remove('hidden')
+          return
+        }
+        
         if (content) {
           fetch(`/create`, {
               method: "POST",
@@ -30,7 +49,11 @@
           })
           .then(response => {
               if (!response.ok) {
-                  throw new Error('Network response was not ok')
+                if (response.status == 413) {
+                  errorStatusEl.innerText = 'Message length should not exceed 2048 bytes'
+                  errorStatusEl.classList.remove('hidden')
+                }
+                throw new Error('Network response was not ok')
               }
               return response.json();
           })
@@ -106,6 +129,8 @@
             </button>
           </div>
         </div>
+
+        <div id="errorstatus" class="bg-red-50 text-red-500 text-center p-1 mt-2 rounded-xl border border-red-300 hidden"></div>
 
         <div class="bg-green-50 p-3 mt-3 rounded-xl border border-green-300">
           <div class="mr-auto place-self-center flex items-center">

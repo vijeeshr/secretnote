@@ -565,6 +565,10 @@ video {
   margin-right: auto;
 }
 
+.mt-2 {
+  margin-top: 0.5rem;
+}
+
 .mt-3 {
   margin-top: 0.75rem;
 }
@@ -740,6 +744,10 @@ video {
 .bg-white {
   --tw-bg-opacity: 1;
   background-color: rgb(255 255 255 / var(--tw-bg-opacity));
+}
+
+.p-1 {
+  padding: 0.25rem;
 }
 
 .p-2 {
