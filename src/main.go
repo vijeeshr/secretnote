@@ -145,13 +145,13 @@ func main() {
 		w.Write(data)
 	})
 
+	// Static files
 	router.HandleFunc("GET /show/{id}", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "public/show.html")
 	})
 	router.HandleFunc("GET /show/output.css", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "public/output.css")
 	})
-
 	router.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "public/index.html")
 	})
@@ -161,11 +161,6 @@ func main() {
 	router.HandleFunc("GET /output.css", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "public/output.css")
 	})
-
-	// fh := http.FileServer(http.Dir("public"))
-	// router.PathPrefix("/board/").Handler(http.StripPrefix("/board/", fh))
-	// router.PathPrefix("/board").Handler(http.StripPrefix("/board", fh))
-	// router.PathPrefix("/").Handler(http.StripPrefix("/", fh))
 
 	logger.Info("Server listening on port 8085")
 	if err := http.ListenAndServe(":8085", router); err != nil {
