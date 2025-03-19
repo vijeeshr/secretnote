@@ -1,9 +1,6 @@
 # Secretnote
 Share secrets/api-keys/tokens safely using self-destructing messages
 
-## Demo
-https://secretmsg.us
-
 ## Running the app  
 ```
 docker compose up
