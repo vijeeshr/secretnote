@@ -1,17 +1,19 @@
-FROM golang:1.22.0-alpine AS backend-builder
+FROM golang:1.25.4-alpine AS backend-builder
 WORKDIR /app
+# Copy Go module files and download dependencies
 COPY src/go.mod src/go.sum ./
 RUN go mod download
-COPY src/*.go .
+# Copy application source code
+COPY src/*.go ./
 COPY src/public public
-RUN CGO_ENABLED=0 GOOS=linux go build -o secretnoteapp .
+# CGO_ENABLED=0 ensures a static binary
+# -ldflags "-s -w" removes debugging symbols, reducing binary size
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags "-s -w" -o secretnoteapp .
 
-FROM alpine:latest AS certificates
-RUN apk --no-cache add ca-certificates
-
-FROM scratch
+FROM scratch AS final
+COPY --from=alpine:latest /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 WORKDIR /app
-COPY --from=certificates /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY --from=backend-builder /app/secretnoteapp .
+
 EXPOSE 8085
 CMD ["./secretnoteapp"]
