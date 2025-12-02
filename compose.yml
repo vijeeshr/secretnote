@@ -2,6 +2,9 @@
 
 # Run docker compose.
 #   docker compose up
+#   To force a rebuild without cache:
+#     docker compose build --no-cache
+#     docker compose up  
 # To stop and remove compose created items
 #   docker compose down --rmi "all" --volumes
 
@@ -19,6 +22,8 @@ services:
       - redisnet
     ports:
       - "6379:6379"
+    volumes:
+      - redis_data:/data  
 
   app:
     build:
@@ -36,6 +41,9 @@ services:
       - redisnet
     ports:
       - "8085:8085"   
+
+volumes:
+  redis_data:
 
 networks:
   redisnet:
